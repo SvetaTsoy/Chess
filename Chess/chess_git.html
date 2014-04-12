@@ -1,0 +1,239 @@
+<html>
+<head>
+<script src="jquery-2.1.0.js"></script>
+</head>
+<body>
+<table>
+<tbody id="id-table">
+</tbody>
+</table>
+<script>
+		var WHITE_K = 10;
+		var WHITE_Q = 9;
+		var WHITE_L = 8;
+		var WHITE_S = 7;
+		var WHITE_H = 6;
+		var WHITE_P = 5;
+		var WHITE_P_START = 4;		 
+		var BLACK_K = -WHITE_K;
+		var BLACK_Q = -WHITE_Q;
+		var BLACK_L = -WHITE_L;
+		var BLACK_S = -WHITE_S;
+		var BLACK_H = -WHITE_H;
+		var BLACK_P = -WHITE_P;
+		var BLACK_P_START = -WHITE_P_START;
+		var white_turn = true;
+		var width = 8;
+		var height = 8;
+		var grid = [
+					[BLACK_L, BLACK_H, BLACK_S, BLACK_Q, BLACK_K, BLACK_S, BLACK_H, BLACK_L],
+					[BLACK_P_START, BLACK_P_START, BLACK_P_START, BLACK_P_START, BLACK_P_START, BLACK_P_START, BLACK_P_START, BLACK_P_START],
+					[0,0,0,0,0,0,0,0],
+					[0,0,0,0,0,0,0,0],
+					[0,0,0,0,0,0,0,0],
+					[0,0,0,0,0,0,0,0],
+					[WHITE_P_START, WHITE_P_START, WHITE_P_START, WHITE_P_START, WHITE_P_START, WHITE_P_START, WHITE_P_START, WHITE_P_START],
+					[WHITE_L, WHITE_H, WHITE_S, WHITE_Q, WHITE_K, WHITE_S, WHITE_H, WHITE_L]
+				   ];
+		function chess_board()
+		{
+			var table = document.getElementById('id-table');
+			table.innerHTML = '';
+			var color = '';
+			for(var i=0;i<height;i++)
+			{
+				var row = document.createElement('tr');
+				row.setAttribute('style', 'height:64px;');
+				for(var j=0; j<width;j++)
+				{
+					var col = document.createElement('td');
+					if(i % 2 == 0)
+						if(j % 2 == 0)
+							color = '#fff';
+						else
+							color = 'grey';
+					else
+						if(j % 2 == 0)
+							color = 'grey';
+						else
+							color = '#fff';
+					col.setAttribute('style', 'width:64px;background-color:' + color + ';background-repeat: no-repeat;background-position: 50%;');
+					col.setAttribute('id', 'cell_' + i + '_' + j);
+					row.appendChild(col);
+				}
+				table.appendChild(row);
+			}
+			redraw_board();
+			var selectedX = 0;
+			var selectedY = 0;
+			var isSelected = false;
+			$('#id-table td').on('click', function(){
+				var x = this.cellIndex;
+				var y = this.parentNode.rowIndex;
+				if(isSelected)
+				{
+					isSelected = false;
+					if(grid[y][x] !== 0)
+						return;
+					if(Math.abs(grid[selectedY][selectedX]) == WHITE_P || Math.abs(grid[selectedY][selectedX]) == WHITE_P_START)
+					{
+						if(move_p(selectedX, selectedY, x, y))
+							white_turn = !white_turn;	
+					}
+					if(Math.abs(grid[selectedY][selectedX]) == WHITE_H)
+					{
+						if(move_h(selectedX, selectedY, x, y))
+						white_turn = !white_turn;
+					}
+					if(Math.abs(grid[selectedY][selectedX]) == WHITE_L)
+					{
+						if(move_l(selectedX, selectedY, x, y))
+						white_turn = !white_turn;
+					}
+					if(Math.abs(grid[selectedY][selectedX]) == WHITE_S)
+					{
+						if(move_s(selectedX, selectedY, x, y))
+						white_turn = !white_turn;
+					}
+					if(Math.abs(grid[selectedY][selectedX]) == WHITE_Q)
+					{
+						if(move_q(selectedX, selectedY, x, y))
+						white_turn = !white_turn;
+					}
+					if(Math.abs(grid[selectedY][selectedX]) == WHITE_K)
+					{
+						if(move_k(selectedX, selectedY, x, y))
+						white_turn = !white_turn;
+					}
+					redraw_board();
+				}
+				else
+				{
+					if(grid[y][x] == 0 || (white_turn && grid[y][x] < 0) || (!white_turn && grid[y][x] > 0))
+						return false;
+					selectedX = x;
+					selectedY = y;
+					isSelected = true;
+				}
+			}
+		}
+		function move_p(fromX, fromY, toX, toY)
+		{
+			if(fromX != toX)
+				return;
+			if(Math.abs(grid[fromY][fromX]) == WHITE_P_START)
+			{
+				if(Math.abs(fromY - toY) > 2)
+					return;
+				grid[fromY][fromX] = WHITE_P * (grid[fromY][fromX] / WHITE_P_START);
+			}
+			else
+			{
+				if(Math.abs(fromY - toY) > 1 || (fromY - toY < 0 && grid[fromY][fromX] == WHITE_P) || (fromY - toY > 0 && grid[fromY][fromX] == BLACK_P))
+					return;
+			}
+			grid[toY][toX] = grid[fromY][fromX];
+			grid[fromY][fromX] = 0;
+			return true;
+		}
+		function move_h(fromX, fromY, toX, toY)
+		{
+			if((Math.abs(toX - fromX) == 2 && Math.abs(toY - fromY) == 1) || (Math.abs(toX - fromX) == 1 && Math.abs(toY - fromY) == 2))
+			{
+				grid[toY][toX] = grid[fromY][fromX];
+				grid[fromY][fromX] = 0;
+				return true;
+			}
+		}
+		function move_l(fromX, fromY, toX, toY)
+		{
+			if((toX == fromX || toY == fromY))
+			{
+			grid[toY][toX] = grid[fromY][fromX];
+			grid[fromY][fromX] = 0;
+			return true;
+			}
+		}
+		function move_s(fromX, fromY, toX, toY)
+		{
+			if(Math.abs(toX-fromX) == Math.abs(toY-fromY))
+			{
+			grid[toY][toX] = grid[fromY][fromX];
+			grid[fromY][fromX] = 0;
+			return true;
+			}
+		}
+		function move_q(fromX, fromY, toX, toY)
+		{
+			if((Math.abs(toX-fromX) == Math.abs(toY-fromY)) || (toX == fromX || toY == fromY))
+			{
+			grid[toY][toX] = grid[fromY][fromX];
+			grid[fromY][fromX] = 0;
+			return true;
+			}
+		}
+		function move_k(fromX, fromY, toX, toY)
+		{
+			if(Math.abs(fromY - toY) > 1 || Math.abs(fromX - toX) > 1)
+				return;
+			grid[toY][toX] = grid[fromY][fromX];
+			grid[fromY][fromX] = 0;
+			return true;
+		}
+		function redraw_board()
+		{
+			for(var i = 0; i < height; i++)
+				for(var j = 0; j < width; j++)
+				{
+					var cell = grid[i][j];
+					var cell_id = $('#cell_' + i + '_' + j);					
+					switch(cell)
+					{
+						case WHITE_K:
+							cell_id.css('background-image', 'url(images/white_k.png)');
+							break;
+						case BLACK_K:
+							cell_id.css('background-image', 'url(images/black_k.png)');
+							break;
+						case WHITE_Q:
+							cell_id.css('background-image', 'url(images/white_q.png)');
+							break;
+						case BLACK_Q:
+							cell_id.css('background-image', 'url(images/black_q.png)');
+							break;
+						case WHITE_L:
+							cell_id.css('background-image', 'url(images/white_l.png)');
+							break;
+						case BLACK_L:
+							cell_id.css('background-image', 'url(images/black_l.png)');
+							break;
+						case WHITE_S:
+							cell_id.css('background-image', 'url(images/white_s.png)');
+							break;
+						case BLACK_S:
+							cell_id.css('background-image', 'url(images/black_s.png)');
+							break;
+						case WHITE_H:
+							cell_id.css('background-image', 'url(images/white_h.png)');
+							break;
+						case BLACK_H:
+							cell_id.css('background-image', 'url(images/black_h.png)');
+							break;
+						case WHITE_P:
+						case WHITE_P_START:
+							cell_id.css('background-image', 'url(images/white_p.png)');
+							break;
+						case BLACK_P:
+						case BLACK_P_START:
+							cell_id.css('background-image', 'url(images/black_p.png)');
+							break;
+						case 0:
+							cell_id.css('background-image', 'none');
+							break;
+					}
+				}
+		}		
+		chess_board();
+</script>
+</body>
+</html>
