@@ -73,7 +73,18 @@
 				if(isSelected)
 				{
 					isSelected = false;
-					if(grid[y][x] !== 0)
+					var q1 = 0;
+					var q2 = 0;
+					if(grid[selectedY][selectedX] < 0)
+						q1 = -1;
+					else if(grid[selectedY][selectedX] > 0)
+						q1 = 1;
+					if(grid[y][x] < 0)
+						q2 = -1;
+					else if(grid[y][x] > 0)
+						q2 = 1;
+
+					if(q1 == q2)
 						return;
 					if(Math.abs(grid[selectedY][selectedX]) == WHITE_P || Math.abs(grid[selectedY][selectedX]) == WHITE_P_START)
 					{
@@ -119,7 +130,18 @@
 		}
 		function move_p(fromX, fromY, toX, toY)
 		{
-			if(fromX != toX)
+			var q1 = 0;
+			var q2 = 0;
+			if(grid[fromX][fromX] < 0)
+				q1 = -1;
+			else if(grid[fromX][fromX] > 0)
+				q1 = 1;
+			if(grid[toY][toX] < 0)
+				q2 = -1;
+			else if(grid[toY][toX] > 0)
+				q2 = 1;
+
+			if((fromX != toX && q1 == q2) || (fromX == toX && grid[toY][toX] != 0))
 				return;
 			if(Math.abs(grid[fromY][fromX]) == WHITE_P_START)
 			{
